@@ -1,10 +1,9 @@
 import java.io.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class main {
@@ -15,18 +14,23 @@ public class main {
 
         // 1. Đọc danh sách sinh viên từ tập tin data.csv được cung cấp
 
-        List<SinhVien> sv = processInputFile("C://Users/huan.tran_onemount/IdeaProjects/QLSV/src/data.txt");
+        List<SinhVien> sv = processInputFile("C:\\Users\\huan.tran_onemount\\IdeaProjects\\QLSV\\src\\data.txt");
         //2. Liệt kê danh sách 10 sinh viên có điểm thi lý thuyết cao nhất
-        List<SinhVien> svCaodiem = (sv.stream().sorted(Comparator.comparing(SinhVien::getlT).reversed()).collect(Collectors.toList()));
+        List<SinhVien> svCaodiem = (sv.stream()
+                .sorted(Comparator.comparing(SinhVien::getlT).reversed())
+                .collect(Collectors.toList()));
         print10(svCaodiem);
 
         //3. Tính điểm tổng kết cho từng sinh viên theo công thức: bonus 10%,
         //report 30%, app 15%, lý thuyết 45%; điểm tổng kết được làm tròn đến
         //0.5 (ví dụ: 7.37 -> 7.5, 6.2 -> 6.0)
-        sv = sv.stream().map(x -> tinhTongDiem(x)).collect(Collectors.toList());
-        print10(sv.stream().sorted(Comparator.comparing(SinhVien::getDiemTongKet).reversed()).collect(Collectors.toList()));
-        writeCsvFile(sv, "C://Users/huan.tran_onemount/IdeaProjects/QLSV/src/out.csv");
-
+        sv = sv.stream().map(main::tinhTongDiem).collect(Collectors.toList());
+        print10(sv.stream()
+                .sorted(Comparator.comparing(SinhVien::getDiemTongKet).reversed())
+                .collect(Collectors.toList()));
+        writeCsvFile(sv, "C:\\Users\\huan.tran_onemount\\IdeaProjects\\QLSV\\src\\out.csv");
+        sv = sv.stream().filter(main::validateMail).collect(Collectors.toList());
+        sv.stream().forEach(System.out::println);
 
     }
 
@@ -87,6 +91,13 @@ public class main {
         }
     }
 
+    private static boolean validateMail(SinhVien sv) {
+        Pattern VALID_EMAIL_ADDRESS_REGEX =
+                Pattern.compile("^[a-z0-9](\\.?[a-z0-9]){5,}@g(oogle)?mail\\.com$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(sv.getEmail());
+        return matcher.find();
+    }
+
     private static SinhVien tinhTongDiem(SinhVien sv) {
 
 
@@ -99,7 +110,7 @@ public class main {
 
     private static List<SinhVien> processInputFile(String inputFilePath) throws IOException {
 
-        List<SinhVien> inputList = new ArrayList<SinhVien>();
+        List<SinhVien> inputList = new ArrayList<>();
 
         try {
 
